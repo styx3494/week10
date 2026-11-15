@@ -2,15 +2,15 @@
 
 ingest 狀態：`待收`、`討論中`、`已寫入`、`已 lint`。
 
-網址必須自己打開確認過才能填。以下候選主題可以拿來搜尋，請優先選原廠文件。
+網址必須自己打開確認過才能填，並優先選原廠文件。01–05 已於 2026-11-16 確認可以開啟、標題相符；實際存成 raw 檔時，請把取得日期改成存檔當天。
 
 | 編號 | 標題 | 網址 | 取得日期 | 狀態 |
 |---|---|---|---|---|
-| 01 | （候選）Docker 官方文件：Port publishing | | | 待收 |
-| 02 | （候選）Docker 官方文件：Networking overview | | | 待收 |
-| 03 | （候選）Microsoft Learn：SMB 共用無法存取的疑難排解 | | | 待收 |
-| 04 | （候選）Microsoft Learn：SMB1 與不安全訪客登入的說明 | | | 待收 |
-| 05 | （候選）NAS 廠商文件（Synology／QNAP 等）：SMB 檔案服務設定 | | | 待收 |
+| 01 | Docker Docs：Port publishing and mapping | https://docs.docker.com/engine/network/port-publishing/ | 2026-11-16 | 待收 |
+| 02 | Docker Docs：Networking overview | https://docs.docker.com/engine/network/ | 2026-11-16 | 待收 |
+| 03 | Microsoft Learn：Enable insecure guest logons in SMB2 and SMB3 for Windows client and Windows Server | https://learn.microsoft.com/en-us/windows-server/storage/file-server/enable-insecure-guest-logons-smb2-and-smb3 | 2026-11-16 | 待收 |
+| 04 | Microsoft Learn：Detect, enable, and disable SMBv1, SMBv2, and SMBv3 in Windows | https://learn.microsoft.com/en-us/windows-server/storage/file-server/troubleshoot/detect-enable-and-disable-smbv1-v2-v3 | 2026-11-16 | 待收 |
+| 05 | Synology Knowledge Center：I cannot access a shared folder on my Synology system via SMB or AFP. What can I do? | https://kb.synology.com/en-global/DSM/tutorial/Why_cant_access_shared_folder | 2026-11-16 | 待收 |
 | 06 | （選用）自己的筆記：`../notes/docker-web-unreachable.html` | 本 repo | | 待收 |
 | 07 | （選用）自己的筆記：`../notes/nas-not-discovered.html` | 本 repo | | 待收 |
 
