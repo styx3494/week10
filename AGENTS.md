@@ -9,6 +9,7 @@
 - `wiki/index.md`：所有 wiki 頁面的目錄，每頁一行，附一句摘要。
 - `wiki/log.md`：每次操作的紀錄，只能往下新增，不能改寫舊紀錄。
 - `wiki/<slug>.md`：概念頁。slug 使用英文小寫與連字號。
+- `discussions/NN-<slug>.md`：每篇 ingest 的討論輸出與決定。
 - `prompts/`：流程中每個節點使用的提示詞。
 - `slides/`：最後產出的 HTML 簡報。
 

@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>家用伺服器排查入門</title>
+<meta name="description" content="給初學者的教學簡報：Docker 網頁打不開、NAS 共用資料夾打不開時，怎麼一步一步排查。內容只取自本專案的 LLM Wiki。">
+<style>
+  :root {
+    --bg: #fbf8f2;
+    --card: #ffffff;
+    --ink: #1d2b44;
+    --muted: #5b6577;
+    --accent: #0f7f7a;
+    --accent-soft: #e2f2f0;
+    --warn: #9a4b00;
+    --warn-soft: #fbeedd;
+    --line: #e4ded3;
+    --code-bg: #f2eee6;
+    --focus: #0f7f7a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #131a26; --card: #1b2433; --ink: #e8edf5; --muted: #a3adbd;
+      --accent: #4fc4bc; --accent-soft: #173a3a; --warn: #f0b072; --warn-soft: #3a2a18;
+      --line: #2c3748; --code-bg: #0f1520; --focus: #4fc4bc;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #131a26; --card: #1b2433; --ink: #e8edf5; --muted: #a3adbd;
+    --accent: #4fc4bc; --accent-soft: #173a3a; --warn: #f0b072; --warn-soft: #3a2a18;
+    --line: #2c3748; --code-bg: #0f1520; --focus: #4fc4bc;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: var(--bg); color: var(--ink);
+    font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+    line-height: 1.7;
+    display: flex; flex-direction: column;
+  }
+  .progress { height: 4px; background: var(--line); }
+  .progress > span { display: block; height: 100%; width: 0; background: var(--accent); transition: width .25s; }
+  main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 24px 16px; overflow-y: auto; }
+  .slide {
+    display: none; width: 100%; max-width: 900px;
+    background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+    padding: clamp(20px, 4vw, 48px);
+  }
+  .slide.active { display: block; }
+  .slide:focus { outline: none; }
+  .kicker { color: var(--accent); font-weight: 700; font-size: .9rem; letter-spacing: .05em; margin: 0 0 .25rem; }
+  h1 { font-size: clamp(1.6rem, 4.5vw, 2.5rem); line-height: 1.3; margin: 0 0 1rem; }
+  h2 { font-size: clamp(1.3rem, 3.6vw, 1.9rem); line-height: 1.35; margin: 0 0 1rem; }
+  ul { padding-left: 1.3em; margin: 0 0 1rem; }
+  li { margin: .45em 0; font-size: clamp(1rem, 2.4vw, 1.15rem); }
+  p { font-size: clamp(1rem, 2.4vw, 1.15rem); }
+  code { font-family: Consolas, "Cascadia Mono", monospace; background: var(--code-bg); padding: .1em .35em; border-radius: 4px; font-size: .95em; }
+  pre { background: var(--code-bg); border-radius: 8px; padding: 12px 14px; overflow-x: auto; margin: 0 0 1rem; }
+  pre code { background: none; padding: 0; white-space: pre; }
+  pre:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+  .note { background: var(--warn-soft); color: var(--ink); border-left: 4px solid var(--warn); padding: 10px 14px; border-radius: 6px; margin: 0 0 1rem; }
+  .note strong { color: var(--warn); }
+  .tip { background: var(--accent-soft); border-left: 4px solid var(--accent); padding: 10px 14px; border-radius: 6px; margin: 0 0 1rem; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin: 0 0 1rem; }
+  .box { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+  .box h3 { margin: 0 0 .3rem; font-size: 1.05rem; color: var(--accent); }
+  .box p { margin: 0; font-size: 1rem; }
+  .myth { display: grid; gap: 10px; }
+  .myth div { border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; }
+  .myth .wrong { color: var(--warn); font-weight: 700; }
+  .myth .right { color: var(--accent); font-weight: 700; }
+  ol.steps { padding-left: 1.4em; }
+  .src { margin-top: 1.25rem; padding-top: .6rem; border-top: 1px dashed var(--line); color: var(--muted); font-size: .85rem; }
+  .src code { font-size: .85rem; }
+  .tag { display: inline-block; font-size: .8rem; font-weight: 700; padding: 0 .5em; border-radius: 4px; margin-right: .3em; vertical-align: .1em; }
+  .tag.ro { background: var(--accent-soft); color: var(--accent); }
+  .tag.rv { background: var(--warn-soft); color: var(--warn); }
+  nav.controls {
+    display: flex; align-items: center; justify-content: center; gap: 12px;
+    padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--line); background: var(--bg);
+  }
+  nav.controls button {
+    font: inherit; font-size: 1rem; color: var(--ink); background: var(--card);
+    border: 1px solid var(--line); border-radius: 8px; padding: 6px 16px; cursor: pointer; min-width: 44px; min-height: 44px;
+  }
+  nav.controls button:hover:not(:disabled) { border-color: var(--accent); }
+  nav.controls button:disabled { opacity: .4; cursor: default; }
+  nav.controls button:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+  #counter { min-width: 4.5em; text-align: center; color: var(--muted); font-variant-numeric: tabular-nums; }
+  @media print {
+    .progress, nav.controls { display: none; }
+    main { display: block; padding: 0; }
+    .slide { display: block; break-after: page; border: none; }
+  }
+</style>
+</head>
+<body>
+<div class="progress" aria-hidden="true"><span id="bar"></span></div>
+<main id="deck" aria-live="polite">
+
+<section class="slide" aria-label="第 1 張">
+  <p class="kicker">家用伺服器排查入門</p>
+  <h1>家用伺服器連不上時，<br>怎麼一步一步排查？</h1>
+  <p>兩個最常見的情況：</p>
+  <div class="grid">
+    <div class="box"><h3>Docker 架的網頁打不開</h3><p>容器明明在跑，別台電腦卻連不到。</p></div>
+    <div class="box"><h3>NAS 的共用資料夾打不開</h3><p>Windows 檔案總管連不上，或被拒絕存取。</p></div>
+  </div>
+  <p class="src">操作：← → 鍵或下方按鈕翻頁。依據：wiki <code>index</code></p>
+</section>
+
+<section class="slide" aria-label="第 2 張">
+  <p class="kicker">先建立一個比喻</p>
+  <h2>房間與門</h2>
+  <ul>
+    <li>容器像是住在主機裡的小房間，<strong>房門預設是關著的</strong>。</li>
+    <li>連不上，通常是下面三種情況之一：</li>
+  </ul>
+  <div class="grid">
+    <div class="box"><h3>門沒開</h3><p>沒有發布連接埠。</p></div>
+    <div class="box"><h3>門只對自己開</h3><p>只有主機自己連得到。</p></div>
+    <div class="box"><h3>門口有人擋</h3><p>沒有權限，或被封鎖。</p></div>
+  </div>
+  <p class="src">依據：<code>docker-port-publishing</code>、<code>docker-bind-address</code>、<code>nas-smb-checklist</code>（一句話說明）</p>
+</section>
+
+<section class="slide" aria-label="第 3 張">
+  <p class="kicker">Docker 篇</p>
+  <h2>Docker 的網路長什麼樣子</h2>
+  <ul>
+    <li>容器預設就有網路，可以<strong>主動對外</strong>連線。</li>
+    <li>沒有指定網路時，容器接在內建的 <strong>default bridge</strong> 網路上。</li>
+  </ul>
+  <div class="tip">能對外連線，<strong>不代表</strong>外面連得進來。</div>
+  <p class="src">依據：<code>docker-network-basics</code></p>
+</section>
+
+<section class="slide" aria-label="第 4 張">
+  <p class="kicker">Docker 篇</p>
+  <h2>開門：用 <code>-p</code> 發布連接埠</h2>
+  <ul>
+    <li>沒有發布的連接埠，主機外面的裝置<strong>連不到</strong>。</li>
+    <li>寫法是「主機連接埠:容器連接埠」：</li>
+  </ul>
+<pre tabindex="0"><code>-p 8080:80
+   ↑     ↑
+  主機   容器</code></pre>
+  <ul>
+    <li>預設是 TCP；要 UDP 時寫成 <code>-p 8080:80/udp</code>。</li>
+  </ul>
+  <p class="src">依據：<code>docker-port-publishing</code></p>
+</section>
+
+<section class="slide" aria-label="第 5 張">
+  <p class="kicker">Docker 篇</p>
+  <h2>門開給誰：<code>0.0.0.0</code> 與 <code>127.0.0.1</code></h2>
+  <div class="grid">
+    <div class="box"><h3>沒寫位址</h3><p><code>-p 8080:80</code><br>發布到主機所有位址。原廠說這「預設不安全」：外面也連得到。</p></div>
+    <div class="box"><h3>綁在 127.0.0.1</h3><p><code>-p 127.0.0.1:8080:80</code><br>只有 Docker 主機自己連得到。</p></div>
+  </div>
+  <div class="note"><strong>注意：</strong>Docker 28.0.0 以前，接在同一台交換器（同一個 L2 網段）的主機，仍可能連到綁在 localhost 的連接埠。</div>
+  <p class="src">依據：<code>docker-bind-address</code></p>
+</section>
+
+<section class="slide" aria-label="第 6 張">
+  <p class="kicker">Docker 篇</p>
+  <h2>Docker 網頁打不開：排查三問</h2>
+  <ol class="steps">
+    <li>啟動時<strong>有沒有加 <code>-p</code></strong>？</li>
+    <li>主機與容器的連接埠<strong>有沒有寫反</strong>？</li>
+    <li>是不是<strong>綁在 <code>127.0.0.1</code></strong>，所以只有主機自己連得到？</li>
+  </ol>
+  <p class="src">依據：<code>docker-port-publishing</code>、<code>docker-bind-address</code>（常見誤解）</p>
+</section>
+
+<section class="slide" aria-label="第 7 張">
+  <p class="kicker">NAS 篇</p>
+  <h2>SMB 是什麼？為什麼不要用 SMB1</h2>
+  <ul>
+    <li>SMB 是 Windows 開共用資料夾用的「語言」，有 SMB1、SMB2、SMB3 等版本。</li>
+    <li>SMB1 有<strong>重大安全弱點</strong>，微軟強烈建議不要使用；Windows 11 預設沒有安裝。</li>
+    <li>NAS 建議設定：最大 <strong>SMB3</strong>、最小 <strong>SMB2</strong>。</li>
+  </ul>
+  <p class="src">依據：<code>smb-protocol-versions</code></p>
+</section>
+
+<section class="slide" aria-label="第 8 張">
+  <p class="kicker">NAS 篇</p>
+  <h2>先查 NAS 端：檢查清單</h2>
+  <p>以 Synology DSM 7 為例，其他品牌的選單名稱不同。</p>
+  <ul>
+    <li>NAS 和電腦在同一個 LAN，NAS 有固定 IP（例如 <code>192.168.1.50</code>）。</li>
+    <li>防火牆沒擋 <code>137–139</code>、<code>445</code>；已啟用 SMB。</li>
+    <li>帳號有 SMB 權限與資料夾權限；不需要的 guest 帳號已停用。</li>
+    <li>DSM 7.2 以上：確認電腦的 IP 沒被自動封鎖。</li>
+  </ul>
+  <p class="src">依據：<code>nas-smb-checklist</code></p>
+</section>
+
+<section class="slide" aria-label="第 9 張">
+  <p class="kicker">NAS 篇</p>
+  <h2>再查 Windows 端</h2>
+  <ol class="steps">
+    <li><span class="tag ro">唯讀查詢</span>分別用 IP 和名稱連線，比較結果：<code>\\192.168.1.50\Public</code></li>
+    <li><span class="tag ro">唯讀查詢</span>IP 可以、名稱不行：檢查 <code>Reply from</code> 後面的 IP 對不對。
+<pre tabindex="0"><code>ping &lt;NAS 名稱&gt;</code></pre></li>
+    <li><span class="tag rv">可逆變更</span>被拒絕：到認證管理員清除舊的 NAS 認證，之後要重新輸入帳密。</li>
+    <li><span class="tag rv">可逆變更</span>有重複連線時，執行下面的命令。它會中斷<strong>所有</strong>網路磁碟機，之後要重新對應。
+<pre tabindex="0"><code>net use * /delete /y</code></pre></li>
+  </ol>
+  <p class="src">依據：<code>windows-smb-client-checks</code></p>
+</section>
+
+<section class="slide" aria-label="第 10 張">
+  <p class="kicker">為什麼會這樣</p>
+  <h2>為什麼 Windows 擋掉訪客登入</h2>
+  <ul>
+    <li>訪客登入就是：<strong>不用帳密</strong>就能開共用資料夾。</li>
+    <li>Windows 10 1709 起預設擋掉（Home、Pro 版有例外）；Windows 11 Pro 自 build 25267 起也預設擋掉。</li>
+    <li>風險：可能被騙連到假的伺服器、遭勒索軟體入侵，或受到中間人攻擊。</li>
+  </ul>
+  <div class="tip">微軟建議<strong>不要</strong>打開訪客登入。改用有權限的帳號，或更換只支援訪客登入的舊裝置。</div>
+  <p class="src">依據：<code>smb-guest-access</code></p>
+</section>
+
+<section class="slide" aria-label="第 11 張">
+  <p class="kicker">為什麼會這樣</p>
+  <h2>Windows 11 24H2 的新門檻：SMB 簽章</h2>
+  <ul>
+    <li>簽章就像是蓋在封包上的<strong>防偽章</strong>，證明內容沒有被竄改。</li>
+    <li>24H2 起預設<strong>要求簽章</strong>：不支援簽章的第三方 SMB 伺服器、訪客共用、工作群組電腦，可能因此連不上。</li>
+    <li>改用不同的 SMB 版本，<strong>不會</strong>改變簽章要求；也不要用停用簽章的方式繞過。</li>
+  </ul>
+  <p class="src">依據：<code>smb-signing</code></p>
+</section>
+
+<section class="slide" aria-label="第 12 張">
+  <p class="kicker">別踩這些坑</p>
+  <h2>三個常見誤解</h2>
+  <div class="myth">
+    <div><span class="wrong">✗ 容器跑起來了，網頁就一定打得開</span><br><span class="right">✓</span> 沒有發布連接埠，外面就連不到。</div>
+    <div><span class="wrong">✗ 連不上 NAS，就打開訪客登入</span><br><span class="right">✓</span> 微軟建議不要這麼做。</div>
+    <div><span class="wrong">✗ 升級 24H2 後連不上，打開 SMB1 就好</span><br><span class="right">✓</span> 簽章要求跟 SMB 版本無關。</div>
+  </div>
+  <p class="src">依據：<code>docker-port-publishing</code>、<code>smb-guest-access</code>、<code>smb-signing</code>（常見誤解）</p>
+</section>
+
+<section class="slide" aria-label="第 13 張">
+  <p class="kicker">總結</p>
+  <h2>排查順序與安全原則</h2>
+  <div class="grid">
+    <div class="box"><h3>Docker</h3><p>有沒有開門（<code>-p</code>）→ 門有沒有開對（順序）→ 門開給誰（綁定位址）</p></div>
+    <div class="box"><h3>NAS</h3><p>先查 NAS 端清單 → 再查 Windows 端</p></div>
+  </div>
+  <div class="note"><strong>安全原則：</strong>不開 SMB1、不開訪客登入。要從外面連回家，原廠建議用 VPN，而不是在路由器設連接埠轉發。</div>
+  <p class="src">依據：<code>docker-port-publishing</code>、<code>docker-bind-address</code>、<code>nas-smb-checklist</code>、<code>windows-smb-client-checks</code>、<code>smb-protocol-versions</code>、<code>smb-guest-access</code></p>
+</section>
+
+<section class="slide" aria-label="第 14 張">
+  <p class="kicker">參考資料</p>
+  <h2>原廠文件</h2>
+  <ul>
+    <li><a href="https://docs.docker.com/engine/network/port-publishing/">Docker Docs：Port publishing and mapping</a></li>
+    <li><a href="https://docs.docker.com/engine/network/">Docker Docs：Networking overview</a></li>
+    <li><a href="https://learn.microsoft.com/en-us/windows-server/storage/file-server/enable-insecure-guest-logons-smb2-and-smb3">Microsoft Learn：Enable insecure guest logons in SMB2 and SMB3</a></li>
+    <li><a href="https://learn.microsoft.com/en-us/windows-server/storage/file-server/troubleshoot/detect-enable-and-disable-smbv1-v2-v3">Microsoft Learn：Detect, enable, and disable SMBv1, SMBv2, and SMBv3</a></li>
+    <li><a href="https://kb.synology.com/en-global/DSM/tutorial/Why_cant_access_shared_folder">Synology：I cannot access a shared folder via SMB or AFP</a></li>
+  </ul>
+  <p class="src">依據：<code>raw/sources.md</code>。本簡報內容只取自本專案的 LLM Wiki。</p>
+</section>
+
+</main>
+<nav class="controls" aria-label="翻頁">
+  <button type="button" id="prev" aria-label="上一張">←</button>
+  <span id="counter" aria-live="polite">1 / 14</span>
+  <button type="button" id="next" aria-label="下一張">→</button>
+</nav>
+<script>
+(function () {
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var prev = document.getElementById('prev');
+  var next = document.getElementById('next');
+  var counter = document.getElementById('counter');
+  var bar = document.getElementById('bar');
+  var deck = document.getElementById('deck');
+  var i = 0;
+  function fromHash() {
+    var n = parseInt((location.hash || '').replace('#', ''), 10);
+    return (n >= 1 && n <= slides.length) ? n - 1 : 0;
+  }
+  function show(n, focus) {
+    i = Math.max(0, Math.min(slides.length - 1, n));
+    slides.forEach(function (s, k) { s.classList.toggle('active', k === i); });
+    counter.textContent = (i + 1) + ' / ' + slides.length;
+    bar.style.width = ((i + 1) / slides.length * 100) + '%';
+    prev.disabled = i === 0;
+    next.disabled = i === slides.length - 1;
+    if (location.hash !== '#' + (i + 1)) history.replaceState(null, '', '#' + (i + 1));
+    deck.scrollTop = 0;
+    if (focus) { slides[i].setAttribute('tabindex', '-1'); slides[i].focus({ preventScroll: true }); }
+  }
+  prev.addEventListener('click', function () { show(i - 1); });
+  next.addEventListener('click', function () { show(i + 1); });
+  document.addEventListener('keydown', function (e) {
+    // 焦點在程式碼區塊時，左右鍵留給橫向捲動
+    if (e.target && e.target.tagName === 'PRE' && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) return;
+    if (e.key === 'ArrowRight' || e.key === 'PageDown') { e.preventDefault(); show(i + 1, true); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); show(i - 1, true); }
+    else if (e.key === 'Home') { e.preventDefault(); show(0, true); }
+    else if (e.key === 'End') { e.preventDefault(); show(slides.length - 1, true); }
+  });
+  window.addEventListener('hashchange', function () { show(fromHash()); });
+  show(fromHash());
+})();
+</script>
+</body>
+</html>

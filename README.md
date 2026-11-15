@@ -4,11 +4,13 @@
 
 ## 進度
 
-- [ ] ingest 至少 5 篇資料（見 `raw/sources.md`）
-- [ ] 每篇 ingest 後跑 lint
-- [ ] 產出簡報大綱並通過檢查
-- [ ] 產出 `slides/index.html` 並通過檢查
-- [ ] 填寫 `reflection.md`
+- [x] ingest 5 篇資料（見 `raw/sources.md`），產出 8 頁 wiki
+- [x] lint，修正 2 個必修問題
+- [x] 產出簡報大綱並通過檢查（修正 6 個問題）
+- [x] 產出 `slides/index.html` 並通過檢查
+- [x] `reflection.md` 草稿
+- [ ] **使用者審核**：逐篇確認 `discussions/` 中由 Claude 代做的決定，並改寫反思
+- [ ] push 到 GitHub，開啟 GitHub Pages
 
 ## 怎麼使用
 
@@ -27,5 +29,5 @@
 | 2. Wiki 成果 | `wiki/` |
 | 3. 教學簡報 | `slides/index.html`（GitHub Pages） |
 | 4. loop / graph | `workflow.md` |
-| 5. 執行與檢查紀錄 | `wiki/log.md` |
+| 5. 執行與檢查紀錄 | `wiki/log.md`、`discussions/` |
 | 6. 反思 | `reflection.md` |
