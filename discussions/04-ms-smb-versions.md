@@ -32,4 +32,5 @@
 
 ## 使用者審核
 
-- （待填）
+- **審核結論：收安全風險、原廠建議、本機查詢和重新開機提醒。** `Get-SmbServerConfiguration` 查的是本機 SMB 伺服器設定。重新開機的提醒應限定在用 Windows 選用功能的 PowerShell 命令安裝或移除 SMBv1。保留 SMB 簽章的獨立要求，略過登錄檔、群組原則和 SMB2／SMB3 功能清單。
+- **修正預設值表述。** raw/04 的 Home／Pro 例外表示文件的通則有適用界線，不能從例外倒推出每個 Windows 10 Home／Pro 組建都已安裝 SMBv1。與 raw/05 的不同措辭一併留在「待確認」。

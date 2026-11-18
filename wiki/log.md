@@ -90,3 +90,19 @@
   3. 【互動】用 file:// 開啟時，Browser 頁面被包成 data: 網址，`#n` 直接跳頁測不出來。改用臨時的本機伺服器測試：`#9` 能直接跳到第 9 張；左右鍵可以翻頁；焦點在程式碼區塊上時，左右鍵留給橫向捲動、不會翻頁 → `通過`
   4. 【初學者測試】題目 2「找不到 NAS 時第一步檢查什麼」，簡報回答不出來，因為「網路探索」是大綱階段就列出的 wiki 缺口。問題出在檢查題目本身：題目是在 wiki 還沒建好前寫的，超出了 wiki 的範圍 → 修改 prompts/07 的題目，改成「打不開 NAS 共用資料夾時先查哪一端」，簡報第 8、13 張可以回答。題目 1、3 分別由第 4 張、第 7 和 12 張回答 → `通過`
 - 處理：只修改了檢查題目，簡報本身不用改。臨時伺服器設定 `.claude/launch.json` 測完已刪除
+
+
+## 2026-11-18｜審核、Ingest 修訂與重跑 lint｜discussions/01–05
+
+- 輸入：raw/01–05、五份討論紀錄、prompts/02-ingest-write.md、prompts/03-lint.md。
+- 討論結論：已逐篇核對五份討論紀錄。02 維持既有取捨。01 保留 Docker 舊版的 localhost 例外，03 只保留啟用訪客登入的設定與代價。04 與 05 保留 SMB1 預設值的文件差異，05 保留有明確診斷條件的 nbtstat -R 與網路磁碟機中斷提醒。
+- 變更：更新 docker-bind-address、smb-guest-access、smb-protocol-versions 與 index，並依本次發現重寫 reflection.md 的三題。
+- 檢查結果：逐份比對討論與原始資料，核對修訂敘述。重跑結構 lint，8 個概念頁的重點來源標註、來源檔、頁面連結、目錄收錄與孤兒頁檢查均通過。五份審核與三題反思皆已填寫。
+- 處理：將 Docker 例外補進重點，移除可直接開啟不安全訪客登入的命令，限定 SMBv1 重新開機提醒的適用操作，保留 Windows 10 SMB1 的待確認項，並修正目錄殘留的「舊 NAS」。
+
+## 2026-11-18｜發布準備｜week10 repo
+
+- 輸入：使用者審核後的 wiki、slides
+- 變更：用 `git subtree split` 把 llm-wiki/ 拆成獨立的 week10 repo 根目錄；新增首頁 `index.html`、繳交文字 `SUBMISSION.md`；在 raw/sources.md 把 06、07 標為未收錄，因為它們在 week9 repo；README 與 AGENTS.md 的主題範圍刪掉「網路探索」，改成註明是缺口
+- 檢查結果：核對審核修訂後的 wiki 與簡報，簡報沒有引用被修改或刪除的內容（啟用訪客登入的命令、SMBv1 重新開機提醒），不必重新生成。raw/01、raw/02 含有 `{{json …}}`，Jekyll 會當成 Liquid 語法處理，可能導致 Pages 建置失敗
+- 處理：加上 `.nojekyll`，讓 Pages 直接提供原始檔案

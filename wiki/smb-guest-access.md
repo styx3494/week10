@@ -10,7 +10,7 @@
 - 版本差異：Windows 10 Home 與 Pro 仍預設允許訪客驗證；Windows 11 Pro（Insider Preview build 25267 起）預設不允許。（來源：raw/03）
 - 開啟訪客登入的風險：可能被騙連到偽造的惡意伺服器而沒有任何警告、可能透過訪客登入執行勒索軟體等惡意程式，也容易遭中間人攻擊。（來源：raw/03）
 - 微軟建議**不要**開啟不安全的訪客登入；正解是升級或更換只支援訪客驗證的裝置。（來源：raw/03）
-- 開啟這個設定（群組原則或 `Set-SmbClientConfiguration -EnableInsecureGuestLogons $true`）還必須停用 SMB 簽章與加密原則，原廠說這會讓用戶端暴露在認證竊取與中繼攻擊之下。**不建議**。（來源：raw/03）
+- Windows 提供啟用不安全訪客登入的群組原則與 PowerShell 設定。啟用時還必須停用 SMB 簽章與加密原則，原廠說這會讓用戶端暴露在認證竊取與中繼攻擊之下。**不建議**。（來源：raw/03）
 - 替代做法：升級或更換只支援訪客驗證的裝置（來源：raw/03）；在 NAS 端停用不需要的 guest 帳號，改用有 SMB 權限與資料夾權限的帳號存取（來源：raw/05）。
 - NAS 端：Synology 的 guest 帳號啟用時，Windows 可能自動用訪客身分存取，因權限不足而被拒；不需要時應停用 guest 帳號。（來源：raw/05）
 - 怎麼確認是這個原因：事件檢視器 Microsoft-Windows-SmbClient/Security 記錄中，事件 31017 代表「拒絕了不安全的訪客登入」。（來源：raw/03）

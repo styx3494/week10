@@ -35,4 +35,5 @@
 
 ## 使用者審核
 
-- （待填）
+- **審核結論：保留 NAS 與 Windows 兩端的檢查。** raw/05 是逐段整理的來源摘錄，足以支撐 DSM 權限、guest、自動封鎖、SMB2～SMB3 和 Windows 舊認證等檢查。保留 `nbtstat -R`，適用於 IP 可連、名稱不可連且名稱對到錯誤 IP 的情境。`net use * /delete /y` 須保留中斷所有網路磁碟機對應的提醒。維持略過 Mac、AFP、LDAP、網域和技術支援用的延伸命令。
+- **修正 SMB1 的裁定。** Synology 註 6 說 Windows 10 version 1709 起預設停用；Microsoft 談的是預設未安裝，並列 Home／Pro 例外。保留來源差異與待確認項，排錯時以實際 Windows 版本、版本別與功能狀態核對。NAS 設定建議仍是最小 SMB2、最大 SMB3。

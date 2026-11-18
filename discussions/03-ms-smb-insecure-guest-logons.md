@@ -33,4 +33,5 @@
 
 ## 使用者審核
 
-- （待填）
+- **審核結論：維持收錄預設行為、版本差異、風險與事件 31017。** 依 raw/03 的 Default behaviors，保留 Windows 10 version 1709、Windows Server 2019、Windows 10 Home／Pro 例外和 Windows 11 Pro Insider Preview build 25267。訪客驗證與簽章相容性由簽章頁承接。
+- **修正寫法。** 原決定只記設定存在與代價，但 wiki 仍有能直接啟用的 PowerShell 指令。移除指令，保留所需停用的保護、微軟的風險說明與升級／更換裝置的建議。維持不收網域群組原則細節。
