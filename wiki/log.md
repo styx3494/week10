@@ -106,3 +106,9 @@
 - 變更：用 `git subtree split` 把 llm-wiki/ 拆成獨立的 week10 repo 根目錄；新增首頁 `index.html`、繳交文字 `SUBMISSION.md`；在 raw/sources.md 把 06、07 標為未收錄，因為它們在 week9 repo；README 與 AGENTS.md 的主題範圍刪掉「網路探索」，改成註明是缺口
 - 檢查結果：核對審核修訂後的 wiki 與簡報，簡報沒有引用被修改或刪除的內容（啟用訪客登入的命令、SMBv1 重新開機提醒），不必重新生成。raw/01、raw/02 含有 `{{json …}}`，Jekyll 會當成 Liquid 語法處理，可能導致 Pages 建置失敗
 - 處理：加上 `.nojekyll`，讓 Pages 直接提供原始檔案
+
+## 2026-11-18｜發布｜github.com/styx3494/week10
+
+- 變更：建立公開的 repo `styx3494/week10`，推送 subtree 拆出的分支到 main，GitHub Pages 的來源設為 main 的根目錄
+- 檢查結果：Pages 大約 25 秒後上線。首頁與 `slides/` 都回應 200；`slides/#10` 能直接跳到第 10 張，方向鍵可以翻頁；SUBMISSION.md 列出的 6 個 GitHub 連結都回應 200；workflow.md 的 Mermaid 圖在 GitHub 上有畫出來
+- 處理：無
